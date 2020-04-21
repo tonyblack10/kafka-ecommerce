@@ -43,7 +43,7 @@ public class KafkaService<T> implements Closeable {
                 records.forEach(record -> {
                     try {
                         parse.consume(record);
-                    } catch (ExecutionException | InterruptedException e) {
+                    } catch (Exception e) {
                         // just logging...
                         e.printStackTrace();
                     }
