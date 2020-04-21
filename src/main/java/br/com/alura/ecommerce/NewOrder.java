@@ -1,5 +1,6 @@
 package br.com.alura.ecommerce;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -16,13 +17,18 @@ public class NewOrder {
         var value = "13455,89985,12345";
         var record = new ProducerRecord<>("ECOMMERCE_NEW_ORDER", value, value);
 
-        producer.send(record, (data, ex) -> {
+        Callback callback = (data, ex) -> {
             if (Objects.nonNull(ex)) {
                 ex.printStackTrace();
                 return;
             }
             System.out.println("sucesso enviando " + data.topic() + ":::partition " + data.partition() + " / offset " + data.offset() + " / timestamp " + data.timestamp());
-        }).get();
+        };
+        producer.send(record, callback).get();
+
+        var email = "Thank you for your order! We are processing your order!";
+        var emailRecord = new ProducerRecord<>("ECOMMERCE_SEND_EMAIL", email, email);
+        producer.send(emailRecord, callback).get();
     }
 
     private static Properties properties() {
