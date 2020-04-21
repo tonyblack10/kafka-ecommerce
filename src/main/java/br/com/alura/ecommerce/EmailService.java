@@ -2,13 +2,16 @@ package br.com.alura.ecommerce;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.io.IOException;
+
 public class EmailService {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         var emailService = new EmailService();
-        var service = new KafkaService(EmailService.class.getSimpleName(), "ECOMMERCE_SEND_EMAIL", emailService::parse);
+        try (var service = new KafkaService(EmailService.class.getSimpleName(), "ECOMMERCE_SEND_EMAIL", emailService::parse)) {
+            service.run();
+        }
 
-        service.run();
     }
 
     private void parse(ConsumerRecord<String, String> record) {
