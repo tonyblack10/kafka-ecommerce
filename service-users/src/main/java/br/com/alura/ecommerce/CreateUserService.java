@@ -12,9 +12,13 @@ public class CreateUserService {
     CreateUserService() throws SQLException {
         String url = "jdbc:sqlite:users_database.db";
         this.connection = DriverManager.getConnection(url);
-        connection.createStatement().execute("CREATE TABLE users (" +
-                "uuid VARCHAR(200) PRIMARY KEY, " +
-                "email VARCHAR(200))");
+        try {
+            connection.createStatement().execute("CREATE TABLE users (" +
+                    "uuid VARCHAR(200) PRIMARY KEY, " +
+                    "email VARCHAR(200))");
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws SQLException {
@@ -29,22 +33,22 @@ public class CreateUserService {
 
     }
 
-    private void parse(ConsumerRecord<String, Order> record) throws InterruptedException, SQLException {
+    private void parse(ConsumerRecord<String, Order> record) throws SQLException {
         System.out.println("------------------------------------------");
         System.out.println("Processing new order, checking for new user");
         System.out.println(record.value());
 
         var order = record.value();
         if(isNewUser(order.getEmail())) {
-            insertNewUser(order.getEmail());
+            insertNewUser(order.getUserId(), order.getEmail());
         }
 
     }
 
-    private void insertNewUser(String email) throws SQLException {
+    private void insertNewUser(String uuid, String email) throws SQLException {
         PreparedStatement statement = this.connection.prepareStatement("INSERT INTO users (uuid, email) VALUES (?, ?)");
-        statement.setString(1, "uuid");
-        statement.setString(2, "email");
+        statement.setString(1, uuid);
+        statement.setString(2, email);
         statement.execute();
 
         System.out.println("User uuid");
