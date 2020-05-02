@@ -9,18 +9,17 @@ import java.util.Map;
 
 public class ReadingReportService {
 
-    private static Path SOURCE = new File("src/main/resources").toPath();
+    private static final Path SOURCE = new File("src/main/resources/report.txt").toPath();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         var reportService = new ReadingReportService();
-        try(var service = new KafkaService<>(ReadingReportService.class.getSimpleName(),
+        try (var service = new KafkaService<>(ReadingReportService.class.getSimpleName(),
                 "USER_GENERATE_READING_REPORT",
                 reportService::parse,
                 User.class,
                 Map.of())) {
             service.run();
         }
-
     }
 
     private void parse(ConsumerRecord<String, User> record) throws IOException {
@@ -29,10 +28,11 @@ public class ReadingReportService {
 
         var user = record.value();
         var target = new File(user.getReportPath());
-
         IO.copyTo(SOURCE, target);
         IO.append(target, "Created for " + user.getUuid());
 
         System.out.println("File created: " + target.getAbsolutePath());
+
     }
+
 }
