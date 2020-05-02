@@ -29,6 +29,7 @@ public class BatchSendMessageService {
 
     public static void main(String[] args) throws SQLException {
         var batchService = new BatchSendMessageService();
+        batchService.getAllUsers();
         try(var service = new KafkaService<>(BatchSendMessageService.class.getSimpleName(),
                 "SEND_MESSAGE_TO_ALL_USERS",
                 batchService::parse,
@@ -51,9 +52,9 @@ public class BatchSendMessageService {
     }
 
     private List<User> getAllUsers() throws SQLException {
-        var results = connection.prepareStatement("select uuid from Users").executeQuery();
+        var results = connection.prepareStatement("select uuid from users").executeQuery();
         List<User> users = new ArrayList<>();
-        while (results.next()) {
+        while(results.next()) {
             users.add(new User(results.getString(1)));
         }
 
