@@ -1,17 +1,15 @@
 package br.com.alura.ecommerce;
 
-import br.com.alura.ecommerce.consumer.KafkaService;
+import br.com.alura.ecommerce.consumer.ConsumerService;
+import br.com.alura.ecommerce.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
-public class CreateUserService {
+public class CreateUserService implements ConsumerService<Order> {
 
     private final Connection connection;
 
@@ -28,17 +26,21 @@ public class CreateUserService {
         }
     }
 
-    public static void main(String[] args) throws SQLException, InterruptedException, ExecutionException, IOException {
-        var createUserService = new CreateUserService();
-        try (var service = new KafkaService<>(CreateUserService.class.getSimpleName(),
-                "ECOMMERCE_NEW_ORDER",
-                createUserService::parse,
-                Map.of())) {
-            service.run();
-        }
+    public static void main(String[] args) {
+        new ServiceRunner<>(CreateUserService::new).start(1);
     }
 
-    private void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_NEW_ORDER";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return CreateUserService.class.getSimpleName();
+    }
+
+    public void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
         System.out.println("------------------------------------------");
         System.out.println("Processing new order, checking for new user");
         System.out.println(record.value());
