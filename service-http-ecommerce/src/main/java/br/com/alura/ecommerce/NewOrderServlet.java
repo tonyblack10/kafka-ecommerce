@@ -14,14 +14,12 @@ import java.util.concurrent.ExecutionException;
 public class NewOrderServlet extends HttpServlet {
 
     private final KafkaDispatcher<Order> orderDispatcher = new KafkaDispatcher<>();
-    private final KafkaDispatcher<Email> emailDispatcher = new KafkaDispatcher<>();
 
     @Override
     public void destroy() {
         super.destroy();
         try {
             orderDispatcher.close();
-            emailDispatcher.close();
         } catch (IOException e) {
             // just logging
             e.printStackTrace();
@@ -41,12 +39,6 @@ public class NewOrderServlet extends HttpServlet {
                     email,
                     new CorrelationId(NewOrderServlet.class.getSimpleName()),
                     order);
-
-            var emailCode = new Email("New Order", "Thank you for your order! We are processing your order!");
-            emailDispatcher.send("ECOMMERCE_SEND_EMAIL",
-                    email,
-                    new CorrelationId(NewOrderServlet.class.getSimpleName()),
-                    emailCode);
 
             System.out.println("New order sent successfully");
 
