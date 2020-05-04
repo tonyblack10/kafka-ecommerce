@@ -17,6 +17,7 @@
 ## Alguns tópicos e patterns abordados
 
  - Designing Event-Driven Systems;
+ - Microservices;
  - Producers e Consumers;
  - Paralelização das mensagens;
  - Serialização e Deserialização customizada de mensagens;
